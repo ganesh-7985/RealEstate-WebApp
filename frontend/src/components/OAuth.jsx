@@ -1,54 +1,45 @@
 import { GoogleAuthProvider, getAuth, signInWithPopup } from 'firebase/auth';
-import { app } from '../firebase.js';
+import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
-import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice.js';
-import { useNavigate } from 'react-router-dom'
+import { signInSuccess } from '../redux/user/userSlice';
+import { useNavigate } from 'react-router-dom';
 
-function OAuth() {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+export default function OAuth() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleGoogleClick = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const auth = getAuth(app);
 
-    const handleGoogleAuth = async () => {
-        dispatch(signInStart());
-        try {
-            const provider = new GoogleAuthProvider();
-            const auth = getAuth(app);
+      const result = await signInWithPopup(auth, provider);
 
-            const result = await signInWithPopup(auth, provider);
-
-            const response = await fetch('/api/auth/google', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: result.user.displayName,  // Use displayName instead of name
-                    email: result.user.email,
-                    photo: result.user.photoURL
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to authenticate with server');
-            }
-
-            const data = await response.json();
-            dispatch(signInSuccess(data));
-            navigate('/');
-            // console.log(data);
-        } catch (error) {
-            console.error("Error while using Google Authentication", error);
-            dispatch(signInFailure());
-        }
-    };
-
-    return (
-        <div className='p-3 max-w-sm md:max-w-lg mx-auto'>
-            <button onClick={handleGoogleAuth} type='button' className='bg-red-700 text-white rounded-lg uppercase p-3 hover:opacity-95 disabled:opacity-80'>
-                Continue With Google
-            </button>
-        </div>
-    );
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: result.user.displayName,
+          email: result.user.email,
+          photo: result.user.photoURL,
+        }),
+      });
+      const data = await res.json();
+      dispatch(signInSuccess(data));
+      navigate('/');
+      console.log(data);
+    } catch (error) {
+      console.log('could not sign in with google', error);
+    }
+  };
+  return (
+    <button
+      onClick={handleGoogleClick}
+      type='button'
+      className='bg-red-700 text-white p-3 rounded-lg uppercase hover:opacity-95'
+    >
+      Continue with google
+    </button>
+  );
 }
-
-export default OAuth;

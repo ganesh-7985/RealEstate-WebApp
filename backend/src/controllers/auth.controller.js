@@ -39,7 +39,7 @@ export const signin = async (req, res, next) => {
 export const google = async (req, res, next) => {
     try {
         const { email, name, photo } = req.body;
-        if (!email || !name || !photo) {
+        if (!email || !name ) {
             return res.status(400).json({ msg: "Missing required fields" });
         }
 

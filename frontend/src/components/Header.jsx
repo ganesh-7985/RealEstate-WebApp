@@ -1,8 +1,14 @@
 import React from 'react'
 import { FaSearch } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
 
 function Header() {
+    // importing the user from the store using the useSelector hook it state.user becauses we named it as user in slice
+    const currentUser = useSelector((state)=>state.user)
+
+    
     return (
         <header className='bg-slate-200 shadow-md'>
             <div className='flex justify-between items-center mx-auto max-w-6xl p-3'>
@@ -22,7 +28,15 @@ function Header() {
                         <li className='hidden md:inline text-slate-700 hover:text-slate-600 hover:underline'>About</li>
                     </Link>
                     <Link to='/profile'>
-                        <li className='hidden md:inline text-slate-700 hover:text-slate-600 hover:underline'>Profile</li>
+                        {currentUser ? (
+                            <img
+                                className='rounded-full h-7 w-7 object-cover'
+                                src={currentUser.avatar}
+                                alt='profile'
+                            />
+                        ) : (
+                            <li className=' text-slate-700 hover:underline'> profile</li>
+                        )}
                     </Link>
                 </ul>
             </div>
